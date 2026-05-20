@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgroSense 360º — Detalle por vaca</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+</head>
+<body>
+
+  <header class="hdr">
+    <a href="mapa.html" class="logo">Agro<span>Sense</span> 360º</a>
+    <div class="hdr-right">
+      <span><span class="dot"></span>Sistema activo</span>
+      <span id="clk">--:--:--</span>
+    </div>
+  </header>
+
+  <nav class="nav">
+    <a href="mapa.html"     class="nav-link">🗺 Mapa en vivo</a>
+    <a href="detalle.html"   class="nav-link active">📊 Detalle por vaca</a>
+    <a href="simulador.html" class="nav-link">🔌 Simulador ESP32</a>
+  </nav>
+
+  <main class="main">
+
+    <select class="cow-select" id="detailSelect" onchange="renderDetail()"></select>
+
+    <div class="detail-layout">
+
+      <div class="card">
+        <div class="card-title">Sensores en tiempo real</div>
+        <div class="big-sensor" id="bigSensors"></div>
+        <div style="font-size:12px;color:#888;margin-bottom:4px;">Nivel de actividad</div>
+        <div class="act-bar-wrap"><div class="act-bar" id="actBar"></div></div>
+        <div style="font-size:11px;color:#888;margin-top:4px;" id="actVal"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Posición GPS</div>
+        <div class="gps-info" id="gpsInfo"></div>
+      </div>
+
+      <div class="card" style="grid-column: 1 / -1;">
+        <div class="card-title">Historial de temperatura — últimos 20 registros</div>
+        <div style="height:140px;">
+          <canvas id="histChart"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    window.addEventListener('load', () => {
+      initDetalle();
+      setInterval(() => {
+        const clk = document.getElementById('clk');
+        if (clk) clk.textContent = new Date().toLocaleTimeString('es-ES');
+      }, 1000);
+    });
+  </script>
+
+</body>
+</html>

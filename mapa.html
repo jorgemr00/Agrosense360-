@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgroSense 360º — Mapa en vivo</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+</head>
+<body>
+
+  <header class="hdr">
+    <a href="mapa.html" class="logo">Agro<span>Sense</span> 360º</a>
+    <div class="hdr-right">
+      <span><span class="dot"></span>Sistema activo</span>
+      <span id="clk">--:--:--</span>
+      <span>5/5 conectadas</span>
+    </div>
+  </header>
+
+  <nav class="nav">
+    <a href="mapa.html"     class="nav-link active">🗺 Mapa en vivo</a>
+    <a href="detalle.html"   class="nav-link">📊 Detalle por vaca</a>
+    <a href="simulador.html" class="nav-link">🔌 Simulador ESP32</a>
+  </nav>
+
+  <main class="main">
+
+    <div class="map-layout">
+      <div class="map-area" id="mapArea">
+        <div class="fence-box" id="fence" style="left:55px;top:40px;right:55px;bottom:40px;"></div>
+        <div id="cowsLayer"></div>
+        <div class="map-label">Campo simulado — GPS AgroSense 360º · Écija, Sevilla</div>
+      </div>
+      <aside class="sidebar">
+        <div class="sb-title">Estado del ganado</div>
+        <div class="cow-list" id="cowList"></div>
+        <div class="alert-section">
+          <div class="alert-title">Alertas recientes</div>
+          <div id="alertLog"></div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="statsbar">
+      <div class="stat"><div class="stat-n" id="sOk">5</div><div class="stat-l">Normal</div></div>
+      <div class="stat"><div class="stat-n" id="sWarn" style="color:#e65100">0</div><div class="stat-l">Revisar</div></div>
+      <div class="stat"><div class="stat-n" id="sOut"  style="color:#c62828">0</div><div class="stat-l">Fuera valla</div></div>
+      <div class="stat"><div class="stat-n" id="sTemp">38.5°</div><div class="stat-l">Temp. media</div></div>
+      <div class="stat"><div class="stat-n" id="sHR">62 bpm</div><div class="stat-l">FC media</div></div>
+      <button class="sos-btn" onclick="triggerSOS()">🚨 SOS Emergencia</button>
+    </div>
+
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    window.addEventListener('load', initMapa);
+  </script>
+
+</body>
+</html>

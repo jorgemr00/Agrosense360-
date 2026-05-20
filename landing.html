@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgroSense 360º — Ganadería de Precisión</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--verde:#1a3a1a;--verde2:#2d5a2d;--verde3:#4caf50;--verde4:#7fe07f;--crema:#f5f0e8;--crema2:#ede5d5;--blanco:#fafaf7;--texto:#1a1a18;--gris:#666660;--dorado:#c8a800;}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--blanco);color:var(--texto);font-family:'DM Sans',sans-serif;overflow-x:hidden;}
+#loginOverlay{position:fixed;inset:0;z-index:9999;background:var(--verde);display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity 0.6s ease,visibility 0.6s ease;}
+#loginOverlay.hidden{opacity:0;visibility:hidden;pointer-events:none;}
+.login-box{background:rgba(255,255,255,0.05);border:1px solid rgba(127,224,127,0.2);border-radius:16px;padding:48px 40px;width:360px;text-align:center;}
+.login-logo{font-family:'Playfair Display',serif;font-size:28px;color:var(--verde4);margin-bottom:8px;}
+.login-logo span{color:rgba(255,255,255,0.7);}
+.login-sub{font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:32px;}
+.login-tag{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(127,224,127,0.5);letter-spacing:2px;margin-bottom:24px;}
+.login-input{width:100%;padding:12px 16px;background:rgba(255,255,255,0.08);border:1px solid rgba(127,224,127,0.2);border-radius:10px;color:#fff;font-size:14px;margin-bottom:12px;outline:none;font-family:'DM Sans',sans-serif;transition:border 0.2s;}
+.login-input::placeholder{color:rgba(255,255,255,0.3);}
+.login-input:focus{border-color:var(--verde4);}
+.login-btn{width:100%;padding:13px;background:var(--verde4);color:var(--verde);border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;margin-top:4px;}
+.login-btn:hover{background:#fff;}
+.login-error{color:#ff7777;font-size:12px;margin-top:8px;display:none;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(26,58,26,0.96);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:space-between;padding:16px 48px;border-bottom:1px solid rgba(127,224,127,0.1);}
+.nav-logo{font-family:'Playfair Display',serif;font-size:20px;color:var(--verde4);text-decoration:none;}
+.nav-logo span{color:rgba(255,255,255,0.7);}
+.nav-links{display:flex;gap:28px;}
+.nav-links a{color:rgba(255,255,255,0.5);text-decoration:none;font-size:13px;transition:color 0.2s;}
+.nav-links a:hover{color:var(--verde4);}
+.nav-app-btn{background:var(--verde4);color:var(--verde);padding:8px 20px;border-radius:100px;font-size:13px;font-weight:600;text-decoration:none;transition:all 0.2s;}
+.nav-app-btn:hover{background:#fff;}
+.hero{min-height:100vh;background:var(--verde);display:flex;flex-direction:column;position:relative;overflow:hidden;padding-top:72px;}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(127,224,127,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(127,224,127,0.03) 1px,transparent 1px);background-size:60px 60px;}
+.hero-glow{position:absolute;top:20%;right:10%;width:500px;height:500px;background:radial-gradient(circle,rgba(76,175,80,0.12) 0%,transparent 70%);pointer-events:none;}
+.hero-content{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 48px;position:relative;z-index:2;}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(127,224,127,0.1);border:1px solid rgba(127,224,127,0.2);color:var(--verde4);padding:6px 18px;border-radius:100px;font-size:11px;font-family:'JetBrains Mono',monospace;letter-spacing:2px;margin-bottom:32px;}
+.hero-tag-dot{width:6px;height:6px;border-radius:50%;background:var(--verde4);animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.hero-title{font-family:'Playfair Display',serif;font-size:clamp(48px,8vw,88px);color:#fff;line-height:1.05;letter-spacing:-2px;margin-bottom:24px;}
+.hero-title em{color:var(--verde4);font-style:italic;}
+.hero-sub{font-size:18px;color:rgba(255,255,255,0.5);max-width:520px;line-height:1.7;margin-bottom:48px;font-weight:300;}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;}
+.btn-primary{background:var(--verde4);color:var(--verde);padding:14px 32px;border-radius:100px;font-size:15px;font-weight:600;text-decoration:none;transition:all 0.2s;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.btn-primary:hover{background:#fff;transform:translateY(-2px);}
+.btn-outline{background:transparent;color:rgba(255,255,255,0.7);padding:14px 32px;border-radius:100px;font-size:15px;text-decoration:none;border:1px solid rgba(255,255,255,0.2);transition:all 0.2s;}
+.btn-outline:hover{border-color:var(--verde4);color:var(--verde4);}
+.hero-stats{position:relative;z-index:2;display:flex;justify-content:center;border-top:1px solid rgba(127,224,127,0.1);padding:28px 48px;flex-wrap:wrap;}
+.hero-stat{text-align:center;padding:0 40px;border-right:1px solid rgba(127,224,127,0.1);}
+.hero-stat:last-child{border-right:none;}
+.hero-stat-n{font-family:'Playfair Display',serif;font-size:32px;color:var(--verde4);}
+.hero-stat-l{font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px;}
+.section{padding:100px 48px;max-width:1200px;margin:0 auto;}
+.section-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dorado);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;}
+.section-title{font-family:'Playfair Display',serif;font-size:clamp(32px,5vw,52px);line-height:1.1;letter-spacing:-1px;margin-bottom:14px;}
+.section-sub{font-size:17px;color:var(--gris);max-width:500px;line-height:1.7;font-weight:300;}
+.features-wrap{padding:100px 0;background:var(--blanco);}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:56px;background:var(--crema2);border-radius:16px;overflow:hidden;}
+.feat-card{background:var(--blanco);padding:36px 32px;transition:background 0.2s;}
+.feat-card:hover{background:var(--crema);}
+.feat-icon{width:44px;height:44px;background:var(--verde);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:20px;}
+.feat-title{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:10px;}
+.feat-desc{font-size:13px;color:var(--gris);line-height:1.7;font-weight:300;}
+.how-wrap{background:var(--verde);padding:100px 48px;}
+.how-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:56px;}
+.how-step{background:rgba(255,255,255,0.04);border:1px solid rgba(127,224,127,0.1);border-radius:12px;padding:28px 24px;}
+.how-num{font-family:'Playfair Display',serif;font-size:32px;color:rgba(127,224,127,0.2);margin-bottom:14px;}
+.how-title{font-size:16px;font-weight:500;color:#fff;margin-bottom:8px;}
+.how-desc{font-size:12px;color:rgba(255,255,255,0.4);line-height:1.7;}
+.device-wrap{padding:100px 0;background:var(--crema);}
+.device-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;margin-top:56px;align-items:center;}
+.device-list{list-style:none;display:flex;flex-direction:column;gap:14px;}
+.device-item{display:flex;align-items:flex-start;gap:14px;padding:18px;background:#fff;border-radius:12px;border:1px solid var(--crema2);}
+.device-item-icon{width:38px;height:38px;flex-shrink:0;background:var(--verde);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.device-item-title{font-size:13px;font-weight:600;margin-bottom:3px;}
+.device-item-desc{font-size:11px;color:var(--gris);line-height:1.5;}
+.device-visual{background:var(--verde);border-radius:16px;padding:36px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#4a9a4a;line-height:1.9;min-height:320px;display:flex;flex-direction:column;justify-content:center;}
+.dv-ok{color:#00ff41;}.dv-send{color:#00aaff;}.dv-warn{color:#ff9800;}
+.about-wrap{padding:100px 0;}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:72px;margin-top:56px;align-items:start;}
+.about-text p{font-size:15px;color:var(--gris);line-height:1.8;margin-bottom:18px;font-weight:300;}
+.about-values{display:flex;flex-direction:column;gap:10px;}
+.val-item{padding:18px 22px;border-left:3px solid var(--verde3);background:var(--crema);border-radius:0 10px 10px 0;}
+.val-title{font-size:13px;font-weight:600;margin-bottom:3px;}
+.val-desc{font-size:12px;color:var(--gris);line-height:1.5;}
+.budget-wrap{background:var(--verde);padding:100px 48px;}
+.budget-form{max-width:700px;margin:56px auto 0;background:rgba(255,255,255,0.05);border:1px solid rgba(127,224,127,0.15);border-radius:16px;padding:40px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-group.full{grid-column:1/-1;}
+.form-label{font-size:12px;color:rgba(255,255,255,0.5);letter-spacing:0.5px;}
+.form-input{padding:11px 14px;background:rgba(255,255,255,0.07);border:1px solid rgba(127,224,127,0.15);border-radius:8px;color:#fff;font-size:13px;outline:none;font-family:'DM Sans',sans-serif;transition:border 0.2s;resize:none;}
+.form-input::placeholder{color:rgba(255,255,255,0.25);}
+.form-input:focus{border-color:var(--verde4);}
+.form-submit{width:100%;padding:14px;background:var(--verde4);color:var(--verde);border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;margin-top:8px;}
+.form-submit:hover{background:#fff;}
+.form-thanks{text-align:center;padding:32px;background:rgba(127,224,127,0.08);border:1px solid rgba(127,224,127,0.2);border-radius:12px;color:var(--verde4);font-size:16px;display:none;max-width:700px;margin:16px auto 0;}
+.form-thanks.show{display:block;}
+.survey-wrap{padding:100px 48px;background:var(--crema);}
+.survey-cards{max-width:720px;margin:56px auto 0;}
+.s-card{background:#fff;border:1px solid var(--crema2);border-radius:12px;padding:28px;margin-bottom:14px;}
+.s-q{font-size:16px;font-weight:500;margin-bottom:18px;}
+.s-opts{display:flex;flex-direction:column;gap:8px;}
+.s-opt{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--crema);border:1px solid var(--crema2);border-radius:8px;cursor:pointer;transition:all 0.15s;font-size:13px;}
+.s-opt:hover{border-color:var(--verde3);background:#fff;}
+.s-opt.sel{border-color:var(--verde3);background:#e8f5e9;color:var(--verde);}
+.s-circle{width:16px;height:16px;border-radius:50%;border:2px solid #ccc;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.s-opt.sel .s-circle{background:var(--verde3);border-color:var(--verde3);}
+.s-opt.sel .s-circle::after{content:'✓';font-size:9px;color:#fff;font-weight:700;}
+.s-result{display:none;margin-top:8px;}
+.s-result.show{display:block;}
+.s-r-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:11px;color:var(--gris);}
+.s-r-bar{flex:1;height:5px;background:var(--crema2);border-radius:3px;overflow:hidden;}
+.s-r-fill{height:100%;background:var(--verde3);border-radius:3px;transition:width 1s ease;}
+.s-r-pct{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--verde);width:30px;text-align:right;}
+.survey-submit{display:block;width:100%;max-width:720px;margin:0 auto;padding:14px;background:var(--verde);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+.survey-submit:hover{background:var(--verde2);}
+.survey-submit:disabled{opacity:0.4;cursor:not-allowed;}
+.survey-thanks{text-align:center;padding:24px;background:#e8f5e9;border-radius:12px;color:var(--verde);font-size:14px;display:none;max-width:720px;margin:12px auto 0;}
+.survey-thanks.show{display:block;}
+.cta-wrap{padding:120px 48px;text-align:center;background:var(--blanco);position:relative;overflow:hidden;}
+.cta-wrap::before{content:'360º';position:absolute;font-family:'Playfair Display',serif;font-size:280px;color:rgba(0,0,0,0.03);top:50%;left:50%;transform:translate(-50%,-50%);white-space:nowrap;pointer-events:none;}
+.cta-title{font-family:'Playfair Display',serif;font-size:clamp(36px,6vw,60px);letter-spacing:-2px;margin-bottom:18px;}
+.cta-sub{font-size:16px;color:var(--gris);max-width:420px;margin:0 auto 36px;line-height:1.7;font-weight:300;}
+footer{background:var(--verde);color:rgba(255,255,255,0.4);padding:36px 48px;display:flex;align-items:center;justify-content:space-between;font-size:12px;flex-wrap:wrap;gap:12px;}
+.footer-logo{font-family:'Playfair Display',serif;font-size:17px;color:var(--verde4);}
+.footer-logo span{color:rgba(255,255,255,0.5);}
+.fade-in{opacity:0;transform:translateY(24px);transition:opacity 0.6s ease,transform 0.6s ease;}
+.fade-in.visible{opacity:1;transform:translateY(0);}
+@media(max-width:768px){nav{padding:14px 20px;}.nav-links{display:none;}.hero-content{padding:60px 20px;}.hero-stats{padding:20px;}.hero-stat{padding:0 16px;}.section{padding:60px 20px;}.features-grid,.how-steps,.device-grid,.about-grid{grid-template-columns:1fr;}.how-wrap,.budget-wrap,.survey-wrap,.cta-wrap{padding:60px 20px;}.form-grid{grid-template-columns:1fr;}footer{padding:24px 20px;flex-direction:column;text-align:center;}}
+</style>
+</head>
+<body>
+
+<div id="loginOverlay">
+  <div class="login-box">
+    <div class="login-tag">ACCESO PRIVADO</div>
+    <div class="login-logo">Agro<span>Sense</span> 360º</div>
+    <div class="login-sub">Introduce tus credenciales para acceder</div>
+    <input class="login-input" id="loginUser" type="text" placeholder="Usuario" autocomplete="off">
+    <input class="login-input" id="loginPass" type="password" placeholder="Contraseña">
+    <button class="login-btn" onclick="doLogin()">Entrar</button>
+    <div class="login-error" id="loginError">Usuario o contraseña incorrectos</div>
+  </div>
+</div>
+
+<nav>
+  <a href="#" class="nav-logo">Agro<span>Sense</span> 360º</a>
+  <div class="nav-links">
+    <a href="#funciones">Funciones</a>
+    <a href="#dispositivo">Dispositivo</a>
+    <a href="#nosotros">Nosotros</a>
+    <a href="#presupuesto">Presupuesto</a>
+    <a href="#encuesta">Encuesta</a>
+  </div>
+  <a href="index.html" class="nav-app-btn">Abrir App →</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow" style="position:absolute;top:20%;right:10%;width:500px;height:500px;background:radial-gradient(circle,rgba(76,175,80,0.12) 0%,transparent 70%);pointer-events:none;"></div>
+  <div class="hero-content">
+    <div class="hero-tag"><span class="hero-tag-dot"></span>SISTEMA DE MONITORIZACIÓN GANADERA</div>
+    <h1 class="hero-title">Tu ganado bajo<br><em>control total</em><br>desde cualquier lugar</h1>
+    <p class="hero-sub">AgroSense 360º monitoriza la salud, posición y comportamiento de tu ganado bovino extensivo en tiempo real mediante tecnología de última generación.</p>
+    <div class="hero-btns">
+      <a href="#presupuesto" class="btn-primary">Solicitar presupuesto</a>
+      <a href="#funciones" class="btn-outline">Conocer más ↓</a>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="hero-stat-n">24/7</div><div class="hero-stat-l">Monitorización continua</div></div>
+    <div class="hero-stat"><div class="hero-stat-n">&lt;2s</div><div class="hero-stat-l">Latencia de datos</div></div>
+    <div class="hero-stat"><div class="hero-stat-n">Bajo</div><div class="hero-stat-l">Coste por dispositivo</div></div>
+    <div class="hero-stat"><div class="hero-stat-n">360º</div><div class="hero-stat-l">Cobertura total</div></div>
+  </div>
+</section>
+
+<div class="features-wrap" id="funciones">
+  <div class="section">
+    <div class="fade-in">
+      <div class="section-label">Funcionalidades</div>
+      <h2 class="section-title">Todo lo que necesitas<br>para tu explotación</h2>
+      <p class="section-sub">Diseñado específicamente para ganadería bovina extensiva en campo abierto.</p>
+    </div>
+    <div class="features-grid fade-in">
+      <div class="feat-card"><div class="feat-icon">📍</div><div class="feat-title">Localización en tiempo real</div><p class="feat-desc">Seguimiento continuo de cada animal actualizado constantemente. Historial completo de movimiento y zonas visitadas.</p></div>
+      <div class="feat-card"><div class="feat-icon">❤️</div><div class="feat-title">Monitor de salud</div><p class="feat-desc">Frecuencia cardíaca y temperatura corporal monitorizadas sin interrupción. Alertas automáticas ante valores fuera de rango.</p></div>
+      <div class="feat-card"><div class="feat-icon">⚡</div><div class="feat-title">Vallado virtual</div><p class="feat-desc">Geofencing sin infraestructura física. El sistema avisa en tiempo real cuando un animal abandona el perímetro definido.</p></div>
+      <div class="feat-card"><div class="feat-icon">📊</div><div class="feat-title">Dashboard completo</div><p class="feat-desc">Panel de control accesible desde cualquier dispositivo con navegador. Sin instalación, sin servidores propios.</p></div>
+      <div class="feat-card"><div class="feat-icon">🔔</div><div class="feat-title">Alertas inteligentes</div><p class="feat-desc">Sistema de notificaciones en tiempo real con registro de eventos. Alerta visual y sonora simultáneamente.</p></div>
+      <div class="feat-card"><div class="feat-icon">🔋</div><div class="feat-title">Larga autonomía</div><p class="feat-desc">Dispositivo AgroTag diseñado para operar durante varios días en campo sin acceso a red eléctrica.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="how-wrap">
+  <div style="max-width:1200px;margin:0 auto;">
+    <div class="fade-in">
+      <div class="section-label" style="color:rgba(127,224,127,0.6);">Proceso</div>
+      <h2 class="section-title" style="color:#fff;">Cómo funciona<br>AgroSense 360º</h2>
+    </div>
+    <div class="how-steps fade-in">
+      <div class="how-step"><div class="how-num">01</div><div class="how-title">El dispositivo recoge datos</div><p class="how-desc">El dispositivo AgroTag colocado en el animal lee temperatura, frecuencia cardíaca y posición de forma continua.</p></div>
+      <div class="how-step"><div class="how-num">02</div><div class="how-title">Transmisión inalámbrica</div><p class="how-desc">Los datos se transmiten mediante tecnología LoRa de largo alcance, ideal para zonas rurales sin cobertura convencional.</p></div>
+      <div class="how-step"><div class="how-num">03</div><div class="how-title">Procesamiento y análisis</div><p class="how-desc">El sistema analiza los datos, detecta anomalías y actualiza el mapa y los paneles en tiempo real.</p></div>
+      <div class="how-step"><div class="how-num">04</div><div class="how-title">Alerta al ganadero</div><p class="how-desc">Ante cualquier incidencia, el ganadero recibe una alerta inmediata en su panel desde cualquier dispositivo.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="device-wrap" id="dispositivo">
+  <div class="section">
+    <div class="fade-in">
+      <div class="section-label">Hardware</div>
+      <h2 class="section-title">El dispositivo AgroTag</h2>
+      <p class="section-sub">Tecnología de precisión en un dispositivo compacto y resistente. Coste accesible para cualquier explotación.</p>
+    </div>
+    <div class="device-grid fade-in">
+      <ul class="device-list">
+        <li class="device-item"><div class="device-item-icon">🧠</div><div><div class="device-item-title">Procesador de alto rendimiento</div><div class="device-item-desc">Cerebro del dispositivo con conectividad integrada. Gestiona todos los sensores y la comunicación en tiempo real.</div></div></li>
+        <li class="device-item"><div class="device-item-icon">🌡️</div><div><div class="device-item-title">Sensor de temperatura</div><div class="device-item-desc">Mide la temperatura corporal del animal con alta precisión. Alerta automática al superar umbrales configurados.</div></div></li>
+        <li class="device-item"><div class="device-item-icon">📡</div><div><div class="device-item-title">Módulo de localización</div><div class="device-item-desc">Posicionamiento de alta sensibilidad para seguimiento en campo abierto. Precisión de metros en exteriores.</div></div></li>
+        <li class="device-item"><div class="device-item-icon">🔊</div><div><div class="device-item-title">Sistema de alertas local</div><div class="device-item-desc">Alerta acústica en el propio dispositivo cuando el animal sale del vallado o presenta valores anómalos.</div></div></li>
+      </ul>
+      <div class="device-visual">
+        <div style="color:var(--verde4);margin-bottom:14px;font-size:12px;">// AgroTag — Monitor en tiempo real</div>
+        <div class="dv-ok">[INICIO] AgroTag iniciando sistema...</div>
+        <div>[MÓDULOS] Cargando sensores...</div>
+        <div class="dv-ok">[LOC  ] Señal adquirida — posición OK</div>
+        <div class="dv-ok">[TEMP ] Sensor temperatura OK</div>
+        <div class="dv-ok">[SYS  ] Sistema listo</div>
+        <div style="margin:10px 0;border-top:1px solid rgba(127,224,127,0.15);"></div>
+        <div class="dv-send" id="dl1">[PKT #1] Temp:38.4°C | FC:62bpm</div>
+        <div class="dv-send" id="dl2">[PKT #2] Loc:OK | Batería:85%</div>
+        <div class="dv-send" id="dl3">[PKT #3] Temp:38.5°C | FC:64bpm</div>
+        <div class="dv-send" id="dl4">[PKT #4] Vallado:OK | Act:72%</div>
+        <div style="margin-top:10px;color:rgba(127,224,127,0.3);font-size:10px;" id="cur">█</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="about-wrap" id="nosotros">
+  <div class="section">
+    <div class="fade-in">
+      <div class="section-label">Sobre el proyecto</div>
+      <h2 class="section-title">Nació de una<br>necesidad real</h2>
+    </div>
+    <div class="about-grid fade-in">
+      <div class="about-text">
+        <p>AgroSense 360º surge de una realidad que viven miles de ganaderos en Andalucía: la dificultad de controlar el estado y la ubicación del ganado extensivo en campo abierto, sin herramientas tecnológicas accesibles.</p>
+        <p>El equipo promotor cuenta con experiencia directa en el sector: conocimiento del entorno ganadero extensivo de la comarca de Écija y del mundo agrícola y del campo, lo que nos permite identificar las necesidades reales desde dentro.</p>
+        <p>Nuestro objetivo es hacer la tecnología accesible para cualquier ganadero, sin importar el tamaño de su explotación.</p>
+      </div>
+      <div class="about-values">
+        <div class="val-item"><div class="val-title">🌱 Accesibilidad</div><div class="val-desc">Tecnología profesional al alcance de pequeños y medianos ganaderos extensivos.</div></div>
+        <div class="val-item"><div class="val-title">🎯 Precisión</div><div class="val-desc">Datos en tiempo real con mínima latencia. Sin retrasos cuando más importa.</div></div>
+        <div class="val-item"><div class="val-title">🔒 Fiabilidad</div><div class="val-desc">Sistema diseñado para operar de forma continua en condiciones de campo.</div></div>
+        <div class="val-item"><div class="val-title">🚀 Escalabilidad</div><div class="val-desc">Desde pocos animales hasta grandes rebaños. Crece con tu explotación.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="budget-wrap" id="presupuesto">
+  <div style="max-width:1200px;margin:0 auto;text-align:center;">
+    <div class="fade-in">
+      <div class="section-label" style="color:rgba(127,224,127,0.6);">Sin compromiso</div>
+      <h2 class="section-title" style="color:#fff;">Solicita tu presupuesto<br>personalizado</h2>
+      <p class="section-sub" style="color:rgba(255,255,255,0.45);margin:0 auto;">Adaptamos el precio a tu explotación. Cuéntanos tu caso y te enviamos una propuesta en 24 horas.</p>
+    </div>
+    <div class="budget-form fade-in" id="budgetForm">
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Nombre completo *</label><input class="form-input" id="f-nombre" type="text" placeholder="Juan García López"></div>
+        <div class="form-group"><label class="form-label">Empresa / Explotación</label><input class="form-input" id="f-empresa" type="text" placeholder="Ganadería García S.L."></div>
+        <div class="form-group"><label class="form-label">NIF / CIF *</label><input class="form-input" id="f-nif" type="text" placeholder="12345678A"></div>
+        <div class="form-group"><label class="form-label">Teléfono *</label><input class="form-input" id="f-tel" type="tel" placeholder="600 000 000"></div>
+        <div class="form-group full"><label class="form-label">Email *</label><input class="form-input" id="f-email" type="email" placeholder="juan@ganaderia.com"></div>
+        <div class="form-group"><label class="form-label">Localidad</label><input class="form-input" id="f-loc" type="text" placeholder="Écija, Sevilla"></div>
+        <div class="form-group"><label class="form-label">Número aproximado de animales</label><select class="form-input" id="f-animales" style="cursor:pointer;"><option value="">Seleccionar...</option><option>Menos de 20</option><option>Entre 20 y 100</option><option>Entre 100 y 300</option><option>Más de 300</option></select></div>
+        <div class="form-group"><label class="form-label">Tipo de explotación</label><select class="form-input" id="f-tipo" style="cursor:pointer;"><option value="">Seleccionar...</option><option>Ganadería extensiva</option><option>Ganadería mixta</option><option>Cooperativa ganadera</option><option>Otro</option></select></div>
+        <div class="form-group full"><label class="form-label">¿Qué necesitas monitorizar principalmente?</label><input class="form-input" id="f-necesidad" type="text" placeholder="Ubicación, salud, vallado virtual..."></div>
+        <div class="form-group full"><label class="form-label">Comentarios adicionales</label><textarea class="form-input" id="f-comentarios" rows="3" placeholder="Cuéntanos más sobre tu explotación o necesidades específicas..."></textarea></div>
+      </div>
+      <button class="form-submit" onclick="submitForm()">Enviar solicitud de presupuesto →</button>
+    </div>
+    <div class="form-thanks" id="formThanks">✅ ¡Solicitud recibida! Nos pondremos en contacto contigo en menos de 24 horas con tu presupuesto personalizado.</div>
+  </div>
+</div>
+
+<div class="survey-wrap" id="encuesta">
+  <div style="max-width:1200px;margin:0 auto;text-align:center;">
+    <div class="fade-in">
+      <div class="section-label">Tu opinión importa</div>
+      <h2 class="section-title">Encuesta de satisfacción</h2>
+      <p class="section-sub" style="margin:0 auto;">Ayúdanos a mejorar AgroSense 360º. Tus respuestas son anónimas.</p>
+    </div>
+    <div class="survey-cards fade-in">
+      <div class="s-card"><div class="s-q">1. ¿Crees que un sistema como AgroSense 360º sería útil para la gestión ganadera real?</div><div class="s-opts" id="q1o"><div class="s-opt" onclick="sel(this,'q1')"><span class="s-circle"></span>Muy útil, lo usaría hoy mismo</div><div class="s-opt" onclick="sel(this,'q1')"><span class="s-circle"></span>Bastante útil con algunas mejoras</div><div class="s-opt" onclick="sel(this,'q1')"><span class="s-circle"></span>Útil pero prefiero métodos tradicionales</div><div class="s-opt" onclick="sel(this,'q1')"><span class="s-circle"></span>No lo veo necesario</div></div><div class="s-result" id="q1r"></div></div>
+      <div class="s-card"><div class="s-q">2. ¿Qué funcionalidad te parece más importante?</div><div class="s-opts" id="q2o"><div class="s-opt" onclick="sel(this,'q2')"><span class="s-circle"></span>Localización en tiempo real</div><div class="s-opt" onclick="sel(this,'q2')"><span class="s-circle"></span>Monitor de salud (temperatura y FC)</div><div class="s-opt" onclick="sel(this,'q2')"><span class="s-circle"></span>Vallado virtual geofencing</div><div class="s-opt" onclick="sel(this,'q2')"><span class="s-circle"></span>Alertas automáticas</div></div><div class="s-result" id="q2r"></div></div>
+      <div class="s-card"><div class="s-q">3. ¿Cómo valorarías el diseño y usabilidad de la aplicación?</div><div class="s-opts" id="q3o"><div class="s-opt" onclick="sel(this,'q3')"><span class="s-circle"></span>⭐⭐⭐⭐⭐ Excelente</div><div class="s-opt" onclick="sel(this,'q3')"><span class="s-circle"></span>⭐⭐⭐⭐ Muy buena</div><div class="s-opt" onclick="sel(this,'q3')"><span class="s-circle"></span>⭐⭐⭐ Buena</div><div class="s-opt" onclick="sel(this,'q3')"><span class="s-circle"></span>⭐⭐ Mejorable</div></div><div class="s-result" id="q3r"></div></div>
+      <div class="s-card"><div class="s-q">4. ¿Estarías dispuesto a participar en una prueba piloto gratuita?</div><div class="s-opts" id="q4o"><div class="s-opt" onclick="sel(this,'q4')"><span class="s-circle"></span>Sí, con mucho interés</div><div class="s-opt" onclick="sel(this,'q4')"><span class="s-circle"></span>Sí, dependiendo de las condiciones</div><div class="s-opt" onclick="sel(this,'q4')"><span class="s-circle"></span>Necesito más información antes</div><div class="s-opt" onclick="sel(this,'q4')"><span class="s-circle"></span>No por ahora</div></div><div class="s-result" id="q4r"></div></div>
+      <button class="survey-submit" id="surveyBtn" onclick="submitSurvey()" disabled>Enviar respuestas</button>
+      <div class="survey-thanks" id="surveyThanks">✅ ¡Gracias por participar! Tus respuestas nos ayudan a mejorar AgroSense 360º.</div>
+    </div>
+  </div>
+</div>
+
+<div class="cta-wrap">
+  <div class="fade-in">
+    <h2 class="cta-title">¿Listo para ver<br>AgroSense en acción?</h2>
+    <p class="cta-sub">Accede a la demo en directo y comprueba cómo funciona el sistema completo.</p>
+    <a href="index.html" class="btn-primary" style="font-size:15px;padding:14px 36px;display:inline-block;">Abrir la aplicación →</a>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">Agro<span>Sense</span> 360º</div>
+  <div>Proyecto Final de Grado · Tecnología e Informática · 2025-2026</div>
+  <div>Écija, Sevilla 🇪🇸</div>
+</footer>
+
+<script>
+function doLogin(){
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value.trim();
+  const err=document.getElementById('loginError');
+  if(u==='agrosense'&&p==='2026'){
+    document.getElementById('loginOverlay').classList.add('hidden');
+    sessionStorage.setItem('as360_auth','1');
+  } else {
+    err.style.display='block';
+    document.getElementById('loginUser').style.borderColor='#ff7777';
+    document.getElementById('loginPass').style.borderColor='#ff7777';
+  }
+}
+document.getElementById('loginUser').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+if(sessionStorage.getItem('as360_auth')==='1'){document.getElementById('loginOverlay').classList.add('hidden');}
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.1});
+document.querySelectorAll('.fade-in').forEach(el=>obs.observe(el));
+let pkt=4,temp=38.4,hr=62;
+const lines=['dl1','dl2','dl3','dl4'];
+setInterval(()=>{
+  pkt++;temp=+(Math.max(37.5,Math.min(41,temp+(Math.random()-0.5)*0.15))).toFixed(1);
+  hr=Math.round(Math.max(45,Math.min(110,hr+(Math.random()-0.5)*3)));
+  const bat=Math.round(80+Math.random()*15);const act=Math.round(60+Math.random()*30);
+  const msgs=[`[PKT #${pkt}] Temp:${temp}°C | FC:${hr}bpm`,`[PKT #${pkt}] Loc:OK | Batería:${bat}%`,`[PKT #${pkt}] Temp:${temp}°C | FC:${hr}bpm`,`[PKT #${pkt}] Vallado:OK | Act:${act}%`];
+  for(let i=0;i<3;i++)document.getElementById(lines[i]).textContent=document.getElementById(lines[i+1]).textContent;
+  document.getElementById(lines[3]).textContent=msgs[Math.floor(Math.random()*msgs.length)];
+},2000);
+setInterval(()=>{const c=document.getElementById('cur');if(c)c.style.opacity=c.style.opacity==='0'?'1':'0';},500);
+function submitForm(){
+  const nombre=document.getElementById('f-nombre').value.trim();
+  const nif=document.getElementById('f-nif').value.trim();
+  const email=document.getElementById('f-email').value.trim();
+  const tel=document.getElementById('f-tel').value.trim();
+  if(!nombre||!nif||!email||!tel){alert('Por favor completa los campos obligatorios (*)');return;}
+  document.getElementById('budgetForm').style.display='none';
+  document.getElementById('formThanks').classList.add('show');
+}
+const answers={};
+const votes={q1:[42,31,18,9],q2:[28,35,22,15],q3:[45,32,17,6],q4:[52,28,14,6]};
+function sel(el,q){
+  document.querySelectorAll('#'+q+'o .s-opt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel');
+  answers[q]=Array.from(el.parentElement.children).indexOf(el);
+  document.getElementById('surveyBtn').disabled=!(['q1','q2','q3','q4'].every(k=>answers[k]!==undefined));
+}
+function submitSurvey(){
+  ['q1','q2','q3','q4'].forEach(q=>{
+    const idx=answers[q];votes[q][idx]++;
+    const total=votes[q].reduce((a,b)=>a+b,0);
+    const labels=Array.from(document.querySelectorAll('#'+q+'o .s-opt')).map(o=>o.textContent.trim());
+    const res=document.getElementById(q+'r');
+    res.innerHTML=labels.map((l,i)=>{const pct=Math.round((votes[q][i]/total)*100);return`<div class="s-r-row"><span style="width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px;">${l}</span><div class="s-r-bar"><div class="s-r-fill" style="width:${pct}%"></div></div><span class="s-r-pct">${pct}%</span></div>`;}).join('');
+    res.classList.add('show');
+  });
+  document.getElementById('surveyBtn').style.display='none';
+  document.getElementById('surveyThanks').classList.add('show');
+  document.querySelectorAll('.s-opt').forEach(o=>o.style.pointerEvents='none');
+}
+</script>
+</body>
+</html>

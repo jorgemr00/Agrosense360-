@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgroSense 360º — Simulador ESP32</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <header class="hdr">
+    <a href="mapa.html" class="logo">Agro<span>Sense</span> 360º</a>
+    <div class="hdr-right">
+      <span><span class="dot"></span>Sistema activo</span>
+      <span id="clk">--:--:--</span>
+    </div>
+  </header>
+
+  <nav class="nav">
+    <a href="mapa.html"     class="nav-link">🗺 Mapa en vivo</a>
+    <a href="detalle.html"   class="nav-link">📊 Detalle por vaca</a>
+    <a href="simulador.html" class="nav-link active">🔌 Simulador ESP32</a>
+  </nav>
+
+  <main class="main">
+
+    <div class="chip-wrap">
+
+      <div class="chip-hdr">
+        <div>
+          <div class="chip-title">AGROTAG-v2.1 — SIMULADOR HARDWARE</div>
+          <div class="chip-sub">ESP32-WROOM-32D · DHT11 · GPS NEO-6M · Buzzer pasivo</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:10px;color:#4a7a4a;">FIRMWARE v2.1.4</div>
+          <div style="font-size:10px;color:#00ff41;" id="uptime">UP: 00:00:00</div>
+        </div>
+      </div>
+
+      <div class="chip-body">
+
+        <!-- COLUMNA IZQUIERDA: Sensores -->
+        <div class="chip-col">
+          <div class="chip-section-title">Seleccionar dispositivo</div>
+          <div id="cowTabs" style="display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap;"></div>
+
+          <div class="chip-section-title">Lectura de sensores</div>
+          <div class="sensor-row"><span class="sensor-key">HR (MAX30102)</span><span class="sensor-val" id="s-hr">-- bpm</span></div>
+          <div class="sensor-row"><span class="sensor-key">TEMP (DHT11)</span><span class="sensor-val" id="s-temp">-- °C</span></div>
+          <div class="sensor-row"><span class="sensor-key">ACCEL X (MPU6050)</span><span class="sensor-val" id="s-ax">-- m/s²</span></div>
+          <div class="sensor-row"><span class="sensor-key">ACCEL Y</span><span class="sensor-val" id="s-ay">-- m/s²</span></div>
+          <div class="sensor-row"><span class="sensor-key">ACTIVIDAD</span><span class="sensor-val" id="s-act">--</span></div>
+          <div class="sensor-row"><span class="sensor-key">BATERÍA</span><span class="sensor-val" id="s-bat">--</span></div>
+          <div class="sensor-row"><span class="sensor-key">SEÑAL GSM</span><span class="sensor-val" id="s-gsm">--</span></div>
+
+          <div class="chip-section-title" style="margin-top:12px;">LEDs de estado</div>
+          <div style="display:flex;gap:12px;align-items:center;padding:6px 0;">
+            <span><span class="led led-g" id="led-gps"></span><span style="font-size:10px;color:#4a7a4a;">GPS</span></span>
+            <span><span class="led led-b" id="led-gsm"></span><span style="font-size:10px;color:#4a7a4a;">GSM</span></span>
+            <span><span class="led" id="led-hr" style="background:#00ff41;box-shadow:0 0 6px #00ff41;"></span><span style="font-size:10px;color:#4a7a4a;">HR</span></span>
+            <span><span class="led led-g"></span><span style="font-size:10px;color:#4a7a4a;">PWR</span></span>
+          </div>
+
+          <div class="chip-section-title" style="margin-top:10px;">Último paquete enviado</div>
+          <div style="font-size:10px;padding:4px 8px;background:#001a2a;border:1px solid #003366;border-radius:4px;color:#00aaff;margin-top:4px;" id="packetFlash">
+            Esperando primer envío...
+          </div>
+        </div>
+
+        <!-- COLUMNA DERECHA: GPS + Terminal -->
+        <div class="chip-col">
+          <div class="chip-section-title">Módulo GPS (NEO-6M simulado)</div>
+          <div style="background:#020702;border:1px solid #1a3a1a;border-radius:6px;padding:8px;margin-bottom:10px;">
+            <div style="display:flex;justify-content:space-between;font-size:10px;padding:2px 0;"><span style="color:#4a7a4a;">LAT</span><span style="color:#00ff41;" id="g-lat">37.5443°N</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:10px;padding:2px 0;"><span style="color:#4a7a4a;">LON</span><span style="color:#00ff41;" id="g-lon">-4.8980°W</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:10px;padding:2px 0;"><span style="color:#4a7a4a;">ALT</span><span style="color:#00ff41;" id="g-alt">-- m</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:10px;padding:2px 0;"><span style="color:#4a7a4a;">SATS</span><span style="color:#00ff41;" id="g-sats">BUSCANDO...</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:10px;padding:2px 0;"><span style="color:#4a7a4a;">FIX</span><span id="g-fix" style="color:#ff9800;">ACQUIRING...</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:10px;padding:2px 0;"><span style="color:#4a7a4a;">VELOCIDAD</span><span style="color:#00ff41;" id="g-spd">-- km/h</span></div>
+          </div>
+
+          <div class="chip-section-title">Terminal serie (115200 baud)</div>
+          <div class="terminal" id="terminal">
+            <div class="term-line info">[BOOT] AgroTag v2.1.4 iniciando...</div>
+            <div class="term-line">[INIT] Cargando módulos de sensores...</div>
+            <div class="term-line info">[GPS ] Buscando satélites GPS...</div>
+            <div class="term-line">[WIFI] Conectando a AgroSense Cloud...</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="chip-footer">
+        <span style="color:#00ff41;">● AGROTAG ACTIVO</span>
+        <span>PAQUETES: <span style="color:#00ff41;" id="packetCount">0</span></span>
+        <span>BATERÍA:
+          <span style="display:inline-block;width:60px;height:4px;background:#0f1f0f;border-radius:2px;vertical-align:middle;">
+            <span id="batBar" style="display:block;height:100%;background:#00ff41;border-radius:2px;width:85%;transition:width 0.5s;"></span>
+          </span>
+          <span id="batPct" style="color:#00ff41;">85%</span>
+        </span>
+        <span style="margin-left:auto;">INTERVALO: 1s · PROTOCOLO: MQTT/TLS</span>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    const chipCows = [
+      { id:'V-001', name:'Blanquita', hr:62,  temp:38.4, act:72, bat:85, gsm:-72 },
+      { id:'V-002', name:'Morena',    hr:65,  temp:38.6, act:85, bat:91, gsm:-68 },
+      { id:'V-003', name:'Canela',    hr:58,  temp:38.8, act:40, bat:78, gsm:-75 },
+      { id:'V-004', name:'Estrella',  hr:88,  temp:39.5, act:20, bat:62, gsm:-81 },
+      { id:'V-005', name:'Pinta',     hr:70,  temp:38.2, act:90, bat:95, gsm:-65 },
+    ];
+
+    let activeCow = 0;
+    let packetCount = 0;
+    let uptimeSec = 0;
+    let gpsFix = false;
+    let baseLat = 37.5443, baseLon = -4.898;
+    let termLines = [];
+
+    const bootMsgs = [
+      ['[GPS ] Fix adquirido — 9 satélites', 'info'],
+      ['[WIFI] Conectado — IP: 192.168.1.47', 'info'],
+      ['[MQTT] Broker: agrosense.cloud:8883', 'info'],
+      ['[DHT ] Sensor temperatura OK', 'info'],
+      ['[SYS ] Sistema listo. Iniciando telemetría...', 'info'],
+    ];
+    let bootIdx = 0;
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function buildTabs() {
+      const el = document.getElementById('cowTabs');
+      el.innerHTML = chipCows.map((c, i) =>
+        `<div onclick="setActiveCow(${i})" style="font-size:10px;padding:3px 8px;background:${i === activeCow ? '#1a3a1a' : '#0f1f0f'};color:${i === activeCow ? '#00ff41' : '#4a7a4a'};cursor:pointer;border-radius:3px;font-family:monospace;">${c.id}</div>`
+      ).join('');
+    }
+
+    function setActiveCow(i) {
+      activeCow = i;
+      buildTabs();
+      addTermLine('[DEV ] Cambiando a ' + chipCows[i].id + ' — ' + chipCows[i].name, 'info');
+    }
+
+    function addTermLine(text, cls = '') {
+      termLines.push({ text, cls });
+      if (termLines.length > 40) termLines.shift();
+      const t = document.getElementById('terminal');
+      t.innerHTML = termLines.map(l => `<div class="term-line ${l.cls}">${l.text}</div>`).join('');
+      t.scrollTop = t.scrollHeight;
+    }
+
+    function chipTick() {
+      uptimeSec++;
+      const h = Math.floor(uptimeSec / 3600);
+      const m = Math.floor((uptimeSec % 3600) / 60);
+      const s = uptimeSec % 60;
+      document.getElementById('uptime').textContent = 'UP: ' + pad(h) + ':' + pad(m) + ':' + pad(s);
+
+      const cow = chipCows[activeCow];
+      cow.hr   = Math.round(Math.max(45, Math.min(110, cow.hr + (Math.random() - 0.5) * 3)));
+      cow.temp = +(Math.max(37.5, Math.min(41, cow.temp + (Math.random() - 0.5) * 0.1))).toFixed(2);
+      cow.act  = Math.round(Math.max(0, Math.min(100, cow.act + (Math.random() - 0.5) * 8)));
+      cow.bat  = +(Math.max(0, cow.bat - 0.003)).toFixed(1);
+      cow.gsm  = Math.round(Math.max(-100, Math.min(-50, cow.gsm + (Math.random() - 0.5) * 2)));
+
+      baseLat += (Math.random() - 0.5) * 0.00005;
+      baseLon += (Math.random() - 0.5) * 0.00005;
+      const alt  = Math.round(210 + (Math.random() - 0.5) * 4);
+      const sats = gpsFix ? Math.round(7 + Math.random() * 4) : 0;
+      const spd  = (cow.act * 0.04).toFixed(1);
+      if (uptimeSec === 5) gpsFix = true;
+
+      const hrColor   = cow.hr > 85 ? 'danger' : cow.hr > 75 ? 'warn' : '';
+      const tempColor = cow.temp > 39.5 ? 'danger' : cow.temp > 39.0 ? 'warn' : '';
+
+      document.getElementById('s-hr').textContent   = cow.hr + ' bpm';
+      document.getElementById('s-hr').className     = 'sensor-val ' + hrColor;
+      document.getElementById('s-temp').textContent = cow.temp + ' °C';
+      document.getElementById('s-temp').className   = 'sensor-val ' + tempColor;
+      document.getElementById('s-ax').textContent   = ((Math.random() - 0.5) * 2).toFixed(2) + ' m/s²';
+      document.getElementById('s-ay').textContent   = ((Math.random() - 0.5) * 2).toFixed(2) + ' m/s²';
+      document.getElementById('s-act').textContent  = cow.act + '%';
+      document.getElementById('s-bat').textContent  = cow.bat.toFixed(0) + '%';
+      document.getElementById('s-bat').className    = 'sensor-val' + (cow.bat < 20 ? ' danger' : cow.bat < 40 ? ' warn' : '');
+      document.getElementById('s-gsm').textContent  = cow.gsm + ' dBm';
+
+      document.getElementById('g-lat').textContent  = baseLat.toFixed(6) + '°N';
+      document.getElementById('g-lon').textContent  = baseLon.toFixed(6) + '°W';
+      document.getElementById('g-alt').textContent  = alt + ' m';
+      document.getElementById('g-sats').textContent = gpsFix ? sats + ' / 12' : 'BUSCANDO...';
+      document.getElementById('g-fix').textContent  = gpsFix ? '3D FIX OK' : 'ACQUIRING...';
+      document.getElementById('g-fix').style.color  = gpsFix ? '#00ff41' : '#ff9800';
+      document.getElementById('g-spd').textContent  = spd + ' km/h';
+
+      document.getElementById('batBar').style.width       = cow.bat + '%';
+      document.getElementById('batBar').style.background  = cow.bat < 20 ? '#ff3333' : cow.bat < 40 ? '#ff9800' : '#00ff41';
+      document.getElementById('batPct').textContent       = cow.bat.toFixed(0) + '%';
+
+      if (bootIdx < bootMsgs.length && uptimeSec <= bootMsgs.length) {
+        addTermLine(bootMsgs[bootIdx][0], bootMsgs[bootIdx][1]);
+        bootIdx++;
+      }
+
+      packetCount++;
+      document.getElementById('packetCount').textContent = packetCount;
+      const tstr = new Date().toISOString().slice(11, 19);
+      const pkg = `{"id":"${cow.id}","ts":"${tstr}","hr":${cow.hr},"t":${cow.temp},"lat":${baseLat.toFixed(6)},"lon":${baseLon.toFixed(6)},"act":${cow.act}}`;
+      document.getElementById('packetFlash').textContent = '→ ' + pkg;
+      if (packetCount % 5 === 0) addTermLine('[MQTT] PKT #' + packetCount + ' → agrosense/telemetria/' + cow.id, 'send');
+      if (cow.hr > 90)  addTermLine('[ALRT] FC elevada: ' + cow.hr + ' bpm', 'warn');
+      if (cow.temp > 39.5) addTermLine('[ALRT] Temperatura alta: ' + cow.temp + '°C', 'err');
+
+      const ledHr = document.getElementById('led-hr');
+      ledHr.style.background   = uptimeSec % 2 === 0 ? '#00ff41' : '#003300';
+      ledHr.style.boxShadow    = uptimeSec % 2 === 0 ? '0 0 6px #00ff41' : 'none';
+      document.getElementById('led-gps').style.background  = gpsFix ? '#00cc44' : '#ff9800';
+      document.getElementById('led-gps').style.boxShadow   = gpsFix ? '0 0 6px #00cc44' : '0 0 6px #ff9800';
+    }
+
+    buildTabs();
+    setInterval(chipTick, 1000);
+    setInterval(() => {
+      const clk = document.getElementById('clk');
+      if (clk) clk.textContent = new Date().toLocaleTimeString('es-ES');
+    }, 1000);
+  </script>
+
+</body>
+</html>
